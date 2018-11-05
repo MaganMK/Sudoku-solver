@@ -1,5 +1,5 @@
 from csp_representation import CSP
-from csp_solver_color_problem import *
+from csp_solver import *
 
 def create_map_coloring_csp():
     """Instantiate a CSP representing the map coloring problem from the
