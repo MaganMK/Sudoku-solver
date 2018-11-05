@@ -7,17 +7,17 @@ def backtracking_search(csp):
     # domains of the CSP variables. The deep copy is required to
     # ensure that any changes made to 'assignment' does not have any
     # side effects elsewhere.
-
+    assignment = copy.deepcopy(csp.domains)
 
     # Run AC-3 on all constraints in the CSP, to weed out all of the
     # values that are not arc-consistent to begin with
-
-
+    ac_3(csp, assignment, csp.get_all_arcs())
     # Call backtrack with the partial assignment 'assignment'
-    return ac_3(csp)
+    return backtrack(csp, assignment)
 
 
-def backtrack(csp):
+
+def backtrack(csp, assignment):
     """The function 'Backtrack' from the pseudocode in the
     textbook.
 
@@ -41,37 +41,58 @@ def backtrack(csp):
     assignments and inferences that took place in previous
     iterations of the loop.
     """
-    # TODO: IMPLEMENT THIS
-    pass
+    if isSolution(assignment):
+        return assignment
+
+    variable = select_unassigned_variable(csp, assignment)
+
+    if variable is None:
+        return assignment
+
+    for value in assignment[variable]:
+        temp = assignment
+        assignment = copy.deepcopy(assignment)
+        assignment[variable] = [value]
+        if(ac_3(csp, assignment, csp.get_all_arcs())):
+            result = backtrack(csp, assignment)
+            if isSolution(result):
+                return result
+        assignment = temp
 
 
-def select_unassigned_variable(csp):
+
+def isSolution(assignment):
+    if assignment is None:
+        return False
+    return all(len(value) == 1 for value in assignment.values())
+
+
+def select_unassigned_variable(csp, assignment):
     """The function 'Select-Unassigned-Variable' from the pseudocode
     in the textbook. Should return the name of one of the variables
     in 'assignment' that have not yet been decided, i.e. whose list
     of legal values has a length greater than one.
     """
     for variable in csp.variables:
-        if len(csp.domains[variable]) > 1:
+        if len(assignment[variable]) > 1:
             return variable
 
-    return
 
 
-def ac_3(csp):
+def ac_3(csp, assignment, arcs):
     """The function 'AC-3' from the pseudocode in the textbook.
     'assignment' is the current partial assignment, that contains
     the lists of legal values for each undecided variable. 'queue'
     is the initial queue of arcs that should be visited.
     """
-    arc_queue = csp.get_all_arcs()
+    arc_queue = arcs
 
     while arc_queue:
         current_arc = arc_queue.pop(0)
         from_node = current_arc[0]
         to_node = current_arc[1]
-        if revise(csp, from_node, to_node):
-            if len(csp.domains[from_node]) == 0:
+        if revise(csp ,assignment, from_node, to_node):
+            if len(assignment[from_node]) == 0:
                 return False
 
             for neigbour_node in csp.get_all_neighboring_arcs(from_node):
@@ -80,7 +101,7 @@ def ac_3(csp):
 
     return True
 
-def revise(csp, i, j):
+def revise(csp, assignment, i, j):
     """The function 'Revise' from the pseudocode in the textbook.
     'assignment' is the current partial assignment, that contains
     the lists of legal values for each undecided variable. 'i' and
@@ -90,9 +111,9 @@ def revise(csp, i, j):
     legal values in 'assignment'.
     """
     did_revise = False
-    for from_node_value in csp.domains[i]:
+    for from_node_value in assignment[i]:
         counter = 0
-        for to_node_value in csp.domains[j]:
+        for to_node_value in assignment[j]:
             test_pair = (from_node_value, to_node_value)
             if j == i:
                 continue
@@ -101,7 +122,7 @@ def revise(csp, i, j):
                 counter += 1
 
         if counter == 0:
-            csp.domains[i].remove(from_node_value)
+            assignment[i].remove(from_node_value)
             did_revise = True
 
     return did_revise

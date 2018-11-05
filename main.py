@@ -17,11 +17,6 @@ def create_map_coloring_csp():
             csp.add_constraint_one_way(state, other_state, lambda i, j: i != j)
             csp.add_constraint_one_way(other_state, state, lambda i, j: i != j)
     return csp
-'''
-color_csp = create_map_coloring_csp()
-print(color_csp.constraints)
-backtracking_search(color_csp)
-'''
 
 
 
@@ -55,21 +50,27 @@ def create_sudoku_csp(filename):
 
     return csp
 
-sdk_csp = create_sudoku_csp("easy.txt")
-print(backtracking_search(sdk_csp))
-print(sdk_csp.domains)
+sdk_csp = create_sudoku_csp("veryhard.txt")
+solution = backtracking_search(sdk_csp)
 
 def print_sudoku_solution(solution):
     """Convert the representation of a Sudoku solution as returned from
     the method CSP.backtracking_search(), into a human readable
     representation.
     """
-    for row in range(9):
-        for col in range(9):
-            print (list(solution['%d-%d' % (row, col)][0],))
-            if col == 2 or col == 5:
-                print ('|',)
-        print()
-        if row == 2 or row == 5:
-            print ('------+-------+------')
+    print(solution)
 
+    counter = 0
+    row = ""
+    for key, value in solution.items():
+
+        row += str(value[0]) + " "
+        counter += 1
+        if counter % 9 == 0:
+            print(row)
+            row = ""
+
+
+
+
+print_sudoku_solution(solution)
