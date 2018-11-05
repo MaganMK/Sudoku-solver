@@ -1,4 +1,5 @@
-def backtracking_search():
+import copy
+def backtracking_search(csp):
     """This functions starts the CSP solver and returns the found
     solution.
     """
@@ -7,14 +8,16 @@ def backtracking_search():
     # ensure that any changes made to 'assignment' does not have any
     # side effects elsewhere.
 
+
     # Run AC-3 on all constraints in the CSP, to weed out all of the
     # values that are not arc-consistent to begin with
 
+
     # Call backtrack with the partial assignment 'assignment'
-    pass
+    return ac_3(csp)
 
 
-def backtrack(self, assignment):
+def backtrack(csp):
     """The function 'Backtrack' from the pseudocode in the
     textbook.
 
@@ -42,27 +45,42 @@ def backtrack(self, assignment):
     pass
 
 
-def select_unassigned_variable(self, assignment):
+def select_unassigned_variable(csp):
     """The function 'Select-Unassigned-Variable' from the pseudocode
     in the textbook. Should return the name of one of the variables
     in 'assignment' that have not yet been decided, i.e. whose list
     of legal values has a length greater than one.
     """
-    # TODO: IMPLEMENT THIS
-    pass
+    for variable in csp.variables:
+        if len(csp.domains[variable]) > 1:
+            return variable
+
+    return
 
 
-def inference(self, assignment, queue):
+def ac_3(csp):
     """The function 'AC-3' from the pseudocode in the textbook.
     'assignment' is the current partial assignment, that contains
     the lists of legal values for each undecided variable. 'queue'
     is the initial queue of arcs that should be visited.
     """
-    # TODO: IMPLEMENT THIS
-    pass
+    arc_queue = csp.get_all_arcs()
 
+    while arc_queue:
+        current_arc = arc_queue.pop(0)
+        from_node = current_arc[0]
+        to_node = current_arc[1]
+        if revise(csp, from_node, to_node):
+            if len(csp.domains[from_node]) == 0:
+                return False
 
-def revise(self, assignment, i, j):
+            for neigbour_node in csp.get_all_neighboring_arcs(from_node):
+                if neigbour_node[0] != to_node:
+                    arc_queue.append((neigbour_node[0],from_node))
+
+    return True
+
+def revise(csp, i, j):
     """The function 'Revise' from the pseudocode in the textbook.
     'assignment' is the current partial assignment, that contains
     the lists of legal values for each undecided variable. 'i' and
@@ -71,5 +89,19 @@ def revise(self, assignment, i, j):
     between i and j, the value should be deleted from i's list of
     legal values in 'assignment'.
     """
-    # TODO: IMPLEMENT THIS
-    pass
+    did_revise = False
+    for from_node_value in csp.domains[i]:
+        counter = 0
+        for to_node_value in csp.domains[j]:
+            test_pair = (from_node_value, to_node_value)
+            if j == i:
+                continue
+
+            if test_pair in csp.constraints[i][j]:
+                counter += 1
+
+        if counter == 0:
+            csp.domains[i].remove(from_node_value)
+            did_revise = True
+
+    return did_revise
