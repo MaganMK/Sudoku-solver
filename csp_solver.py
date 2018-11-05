@@ -41,26 +41,28 @@ def backtrack(csp, assignment):
     assignments and inferences that took place in previous
     iterations of the loop.
     """
+
+    #First checking if we have a solution
     if isSolution(assignment):
         return assignment
 
+    #Selecting a variable to assign a value
     variable = select_unassigned_variable(csp, assignment)
 
-    if variable is None:
-        return assignment
-
+    #The search begins
     for value in assignment[variable]:
-        temp = assignment
-        assignment = copy.deepcopy(assignment)
-        assignment[variable] = [value]
-        if(ac_3(csp, assignment, csp.get_all_arcs())):
-            result = backtrack(csp, assignment)
-            if isSolution(result):
+        temp = assignment                                   #Making sure we kan "undo" our choices if the search needs to backtrack
+        assignment = copy.deepcopy(assignment)              #Copying to make sure backtracking is proper
+        assignment[variable] = [value]                      #Assigning the choosen variable with the first value in its domain
+        if(ac_3(csp, assignment, csp.get_all_arcs())):      #Using ac-3 algorithm to make the search faster
+            result = backtrack(csp, assignment)             #Going deeper in the search tree
+            if isSolution(result):                          #Have we found our solution now?
                 return result
-        assignment = temp
+        assignment = temp                                   #We have to backtrack
 
 
 
+#Simple checker to see if we have a solution
 def isSolution(assignment):
     if assignment is None:
         return False
@@ -92,9 +94,10 @@ def ac_3(csp, assignment, arcs):
         from_node = current_arc[0]
         to_node = current_arc[1]
         if revise(csp ,assignment, from_node, to_node):
-            if len(assignment[from_node]) == 0:
+            if len(assignment[from_node]) == 0: #There is no possible solution within this domain
                 return False
 
+            #If we did a change to currents domain, we need to look at all the arcs from that node again
             for neigbour_node in csp.get_all_neighboring_arcs(from_node):
                 if neigbour_node[0] != to_node:
                     arc_queue.append((neigbour_node[0],from_node))
@@ -112,16 +115,17 @@ def revise(csp, assignment, i, j):
     """
     did_revise = False
     for from_node_value in assignment[i]:
-        counter = 0
+        found_valid_pair = False # using bool to check if we find a valid
         for to_node_value in assignment[j]:
             test_pair = (from_node_value, to_node_value)
             if j == i:
                 continue
 
             if test_pair in csp.constraints[i][j]:
-                counter += 1
+                found_valid_pair = True # We can only remove from domain if we hav NO valid pairs, so finding just one is enough
 
-        if counter == 0:
+        # The bread and butter of the ac-3; No pair of values for the two nodes holds and we have to remove that value from the nodes domain
+        if not found_valid_pair:
             assignment[i].remove(from_node_value)
             did_revise = True
 

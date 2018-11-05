@@ -71,6 +71,4 @@ def print_sudoku_solution(solution):
             row = ""
 
 
-
-
 print_sudoku_solution(solution)
