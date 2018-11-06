@@ -50,6 +50,7 @@ def create_sudoku_csp(filename):
 
     return csp
 
+print("Very hard board")
 sdk_csp = create_sudoku_csp("veryhard.txt")
 solution = backtracking_search(sdk_csp)
 
@@ -58,7 +59,6 @@ def print_sudoku_solution(solution):
     the method CSP.backtracking_search(), into a human readable
     representation.
     """
-    print(solution)
 
     counter = 0
     row = ""

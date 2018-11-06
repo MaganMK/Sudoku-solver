@@ -1,5 +1,9 @@
 import copy
+
+backtrack_counter = 0
+failure_counter = 0
 def backtracking_search(csp):
+    backtrack_counter = 0
     """This functions starts the CSP solver and returns the found
     solution.
     """
@@ -18,6 +22,10 @@ def backtracking_search(csp):
 
 
 def backtrack(csp, assignment):
+    global backtrack_counter
+    global failure_counter
+    backtrack_counter += 1
+
     """The function 'Backtrack' from the pseudocode in the
     textbook.
 
@@ -44,6 +52,8 @@ def backtrack(csp, assignment):
 
     #First checking if we have a solution
     if isSolution(assignment):
+        print("Calls to backtrack:", backtrack_counter)
+        print("Search returned a failure:", failure_counter, "times")
         return assignment
 
     #Selecting a variable to assign a value
@@ -56,9 +66,13 @@ def backtrack(csp, assignment):
         assignment[variable] = [value]                      #Assigning the choosen variable with the first value in its domain
         if(ac_3(csp, assignment, csp.get_all_arcs())):      #Using ac-3 algorithm to make the search faster
             result = backtrack(csp, assignment)             #Going deeper in the search tree
-            if isSolution(result):                          #Have we found our solution now?
+            if result is not None:                          #Have we reached a dead end?
                 return result
+
         assignment = temp                                   #We have to backtrack
+
+    failure_counter += 1
+    return None
 
 
 
